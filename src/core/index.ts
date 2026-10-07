@@ -1,3 +1,4 @@
+export type { CircuitSnapshot } from "../queue/circuit-breaker.ts";
 export type { RetryPolicy, RetryPolicyContext } from "../queue/policy.ts";
 export { defaultRetryPolicy } from "../queue/policy.ts";
 export type { TicketStatus, TicketUpdate } from "../ticket/ticket.ts";
