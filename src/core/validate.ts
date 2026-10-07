@@ -3,6 +3,7 @@ import type {
 	CircuitBreakerConfig,
 	ClientConfig,
 	PartitionConfig,
+	RedirectMode,
 	RequestOptions,
 	RetryConfig,
 	TimeoutConfig,
@@ -31,6 +32,8 @@ export function validateRequestBody(body: BodyInit | (() => BodyInit) | undefine
 	}
 }
 
+const REDIRECT_MODES: ReadonlySet<unknown> = new Set<RedirectMode>(["follow", "manual"]);
+
 export function validateConfig(config: ClientConfig): void {
 	if (config.baseUrl !== undefined && !URL.canParse(config.baseUrl)) {
 		throw new ConfigurationError("baseUrl must be an absolute URL");
@@ -54,6 +57,11 @@ export function validateConfig(config: ClientConfig): void {
 	validateRetryConfig(config.retry, "retry");
 	validateCircuitBreakerConfig(config.circuitBreaker, "circuitBreaker");
 	validatePartitions(config.partitions);
+	if (config.redirect !== undefined && !REDIRECT_MODES.has(config.redirect)) {
+		throw new ConfigurationError(
+			'redirect must be "follow" or "manual" (use "manual" to reject redirects: a 3xx comes back as an HttpError)',
+		);
+	}
 }
 
 /** Validates a single request's own `timeout`/`retry` options — the raw

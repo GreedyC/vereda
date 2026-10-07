@@ -29,6 +29,7 @@ import type {
 	ParsedRequestOptions,
 	ParseFn,
 	PartitionConfig,
+	RedirectMode,
 	RequestOptions,
 	RetryConfig,
 	TimeoutConfig,
@@ -58,6 +59,7 @@ export class HttpClient {
 	private readonly metrics: MetricsSink | undefined;
 	private readonly redactQuery: boolean;
 	private readonly customFetch: typeof globalThis.fetch | undefined;
+	private readonly redirect: RedirectMode | undefined;
 	private _closed = false;
 	private _closing: Promise<void> | undefined;
 	private readonly _inflightTickets = new Set<InflightTicket>();
@@ -68,6 +70,7 @@ export class HttpClient {
 		this.metrics = config.metrics;
 		this.redactQuery = config.redactQuery !== false;
 		this.customFetch = config.fetch;
+		this.redirect = config.redirect;
 		this.partitionConfigs = config.partitions ?? {};
 		const semaphore = new Semaphore(
 			config.concurrency ?? DEFAULT_GLOBAL_CONCURRENCY,
@@ -406,6 +409,7 @@ export class HttpClient {
 						ticketId: ticket.id,
 						partition: partitionName,
 						fetch: this.customFetch,
+						redirect: this.redirect,
 					},
 					this.middlewares,
 				);
@@ -719,6 +723,7 @@ export class HttpClient {
 			firstError,
 			initialQueuedMs,
 			fetch: this.customFetch,
+			redirect: this.redirect,
 			onRetry: (attempt, delayMs, error) => {
 				this.emit("retry", {
 					ticketId: ticket.id,
