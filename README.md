@@ -38,6 +38,18 @@ if (result.success) {
 
 A dropped connection, a timeout, or a `503` on that request is retried up to three times with jittered exponential backoff before your code sees an error. Reading `result.raw` afterwards is bounded too: the body read has to finish within the same `attemptMs` (counted from when the attempt started) and `totalMs` limits, or the read rejects with Vereda's own `TimeoutError` (attempt bound) or `DeadlineExceededError` (`totalMs` bound).
 
+## Contents
+
+| | | |
+| --- | --- | --- |
+| **[Retries and backoff](#retries-and-backoff)**<br>Jittered exponential retries for transient failures | **[Timeouts](#timeouts)**<br>Per-attempt timeout plus an optional total deadline | **[Bulkhead isolation](#bulkhead-isolation)**<br>A concurrency limit and queue per host |
+| **[Circuit breaker](#circuit-breaker)**<br>Stop calling a host that is clearly failing | **[Cancellation](#cancellation)**<br>Cancel from the ticket or an `AbortSignal` | **[Tickets](#tickets)**<br>Await, subscribe to, or cancel a request |
+| **[Typed results](#typed-results)**<br>Validate the body with any `parse` function | **[Error handling](#error-handling)**<br>A closed error hierarchy with a literal `kind` | **[Middleware](#middleware)**<br>Onion-style hooks around every attempt |
+| **[Custom fetch](#custom-fetch)**<br>Swap `globalThis.fetch` for your own | **[Lifecycle events](#lifecycle-events)**<br>Typed client-wide events for logging | **[Metrics](#metrics)**<br>Counters, histograms and gauges to any sink |
+
+**Start:** [Why Vereda?](#why-vereda) · [Quick start](#quick-start) · [Example](#example-one-failing-dependency) · [How it works](#how-it-works)  
+**Project:** [Design philosophy](#design-philosophy) · [Documentation](#documentation) · [Versioning](#versioning-and-support) · [Contributing](#contributing) · [Why the name?](#why-the-name) · [License](#license)
+
 ## Why Vereda?
 
 `fetch` makes one attempt. Everything after that is yours to write:
