@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `redirect` client option (`"follow"` | `"manual"`, default `"follow"`), set on every attempt's fetch init and exposed to middleware as `ctx.redirect`. fetch's `"error"` mode is rejected: its `TypeError` on a 3xx is indistinguishable from a network failure, so redirects would be retried and counted against the circuit breaker. With `"manual"`, a 3xx comes back as an `HttpError` whose `response` carries the `Location` header, so callers can vet each hop themselves.
 
+### Changed
+
+- A retry whose delay (backoff or capped `Retry-After`) would run to or past `timeout.totalMs` is no longer slept on: the ticket fails right away with `DeadlineExceededError`, whose `cause` is the last attempt's error. Before, it slept until the deadline and then failed with the same error. `DeadlineExceededError` can therefore arrive before `totalMs` has elapsed (#143).
+
 ### Documentation
 
 - README documents the `fetch` client option, with a security note: automatic redirects bypass dispatcher-level DNS guards for IP-literal targets, so SSRF-sensitive callers should use `redirect: "manual"` and follow hops themselves.
